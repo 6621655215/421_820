@@ -12,11 +12,11 @@ const validateData = (userData) => {
   if (!userData.gender) {
       errors.push('กรุณาเลือกเพศ');
   }
-  if (!userData.interests || userData.interests.length === 0) {
-      errors.push('กรุณาเลือกความสนใจ');
+  if (!userData.description) {
+      errors.push('กรุณากรอกข้อมูลตัวเอง');
   }
-  if (!userData.description) { 
-      errors.push('กรุณากรอกข้อมูล');
+  if (!userData.interests) {
+      errors.push('กรุณาเลือกความสนใจ');
   }
   return errors;
 };
@@ -29,68 +29,58 @@ const submitData = async () => {
   let interestDOMs = document.querySelectorAll('input[name="interest"]:checked');
   let descriptionDOM = document.querySelector('textarea[name="description"]');
   let messageDOM = document.getElementById('message');
-  let formContainer = document.querySelector('.container');
 
-  if (!messageDOM) {
-      console.error('ไม่พบ element ที่มี id="message" ใน HTML');
+  let interests = [...interestDOMs].map(el => el.value).join(',') || '';
+
+  let userData = {
+      firstname: firstNameDOM.value.trim() || '',
+      lastname: lastnameDOM.value.trim() || '',
+      age: ageDOM.value.trim() || '',
+      gender: genderDOM.value || '',
+      description: descriptionDOM.value.trim() || '',
+      interests: interests
+  };
+
+  console.log('submitData', userData);
+  
+  const errors = validateData(userData);
+  if (errors.length > 0) {
+      let errorHTML = `<div class="error-box"><strong>กรุณากรอกข้อมูลให้ครบถ้วน</strong><ul>`;
+      errors.forEach(err => {
+          errorHTML += `<li>${err}</li>`;
+      });
+      errorHTML += '</ul></div>';
+      
+      messageDOM.innerHTML = errorHTML;
+      messageDOM.className = 'message danger';
       return;
   }
 
-  let interest = [];
-  for (let i = 0; i < interestDOMs.length; i++) {
-      interest.push(interestDOMs[i].value);
-  }
-
-  let userData = {
-      firstname: firstNameDOM?.value || '',
-      lastname: lastnameDOM?.value || '',
-      age: ageDOM?.value || '',
-      gender: genderDOM ? genderDOM.value : '',
-      description: descriptionDOM?.value || '',
-      interests: interest
-  };
-  console.log('submitData', userData);
-  
   try {
-      const errors = validateData(userData);
-      if (errors.length > 0) {
-          throw {
-              message: 'กรุณากรอกข้อมูลให้ครบถ้วน',
-              errors: errors
-          };
-      }
-      
       const response = await axios.post('http://localhost:8000/users', userData);
       console.log('response', response.data);
+
       messageDOM.innerText = 'บันทึกข้อมูลเรียบร้อย';
       messageDOM.className = 'message success';
-      showAlert('ข้อมูลบันทึกสำเร็จ!', 'success');
   } catch (error) {
       console.log('error message', error.message);
-      let htmlData = '<div class="error-box" style="background-color: #ffcccc; padding: 10px; border-radius: 5px; margin-bottom: 10px;">';
-      htmlData += '<div><strong>' + error.message + '</strong></div>';
-      htmlData += '<ul>';
-      if (error.errors && error.errors.length > 0) {
-          error.errors.forEach(err => {
-              htmlData += '<li>' + err + '</li>';
-          });
-      }
-      htmlData += '</ul>';
-      htmlData += '</div>';
-      
-      messageDOM.innerHTML = htmlData;
-      messageDOM.className = 'message danger';
-      formContainer.insertBefore(messageDOM, formContainer.querySelector('.button').parentElement);
-      showAlert('กรุณากรอกข้อมูลให้ครบถ้วน!', 'danger');
-  }
-};
 
-const showAlert = (message, type) => {
-  let alertBox = document.createElement('div');
-  alertBox.classList.add('alert', type); 
-  alertBox.innerText = message;
-  document.querySelector('.container').insertBefore(alertBox, document.querySelector('.header'));
-  setTimeout(() => {
-    alertBox.remove();
-  }, 3000);
+      let errorHTML = `<div class="error-box"><strong>เกิดข้อผิดพลาด</strong><ul>`;
+      if (error.response) {
+          error.message = error.response.data.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์';
+          error.errors = error.response.data.errors || ['โปรดลองอีกครั้ง'];
+      } else {
+          error.message = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์';
+          error.errors = ['โปรดตรวจสอบการเชื่อมต่ออินเทอร์เน็ต'];
+      }
+
+      errorHTML += `<li>${error.message}</li>`;
+      error.errors.forEach(err => {
+          errorHTML += `<li>${err}</li>`;
+      });
+      errorHTML += '</ul></div>';
+
+      messageDOM.innerHTML = errorHTML;
+      messageDOM.className = 'message danger';
+  }
 };
