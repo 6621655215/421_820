@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .bt{
+            background-color: bisque;
+            padding: 5px;
+            border: 0;
+        }
+
+        .bt:hover{
+            background-color: aqua;
+        }
+
+        .bt:active{
+            background-color: blue;
+        }
+
+        
+        .bt:focus{
+            background-color: chartreuse;
+        }
+
+        input:focus{
+            background-color: rgb(239, 162, 106);
+        }
+
+        .con .item:first-child{
+            background-color: rgb(100, 237, 178);
+        }
+
+        .con .item:nth-child(2),
+        .con .item:nth-child(4){
+            background-color: cornflowerblue;
+        }
+
+        .con .item:last-child{
+            background-color: rgb(235, 100, 237);
+        }
+
+    </style>
+</head>
+<body>
+    <!--hover = เมาส์วาง active = คลิกเมาส์ focus = cursor-->
+    <input type="text">
+    <button class="bt">Button</button>
+
+    <div class="con">
+        <div class="item">item1</div>
+        <div class="item">item2</div>
+        <div class="item">item3</div>
+        <div class="item">item4</div>
+        <div class="item">item5</div>
+    </div>
+</body>
+</html>
